@@ -1,6 +1,6 @@
 # Open Claw Infrastructure
 
-A project to run openclaw on
+Infrastructure to run openclaw on AWS Lightsail.
 
 ## AWS Infrastructure
 
@@ -81,7 +81,7 @@ login to target account:
 AWS_PROFILE=knip-builds
 aws sso login --profile $AWS_PROFILE
 ```
-(if not not found type `aws sso configure` and fille in the stuff. More details about how to set up sso here [this blog post](https://blog.knip-builds.de/posts/aws-sso/))
+(if not found type `aws sso configure` and fill in the details. More details about how to set up sso here [this blog post](https://blog.knip-builds.de/posts/aws-sso/))
 
 login to pulumi backend:
 ```

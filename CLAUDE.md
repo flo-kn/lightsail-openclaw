@@ -60,7 +60,7 @@ Install dependencies with `bun install`, not `npm install` or `yarn`.
 }
 ```
 
-- No `scripts` block — Pulumi handles build/deploy.
+- No build/deploy `scripts` — Pulumi handles that. Lint scripts (e.g. `lint:sh`) are allowed.
 - `"license"` is `"UNLICENSED"`.
 - Add provider packages (e.g. `@pulumi/awsx`, `@pulumi/cloudflare`) only when the project uses them.
 - Always use caret (`^`) ranges, not pinned versions.

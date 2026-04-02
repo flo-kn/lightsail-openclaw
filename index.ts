@@ -13,6 +13,9 @@ const tags = {
     "org": "knip-builds",
 };
 
+const awsConfig = new pulumi.Config("aws");
+const region = awsConfig.require("region");
+
 // --- SSH access ---
 
 // Auto-generated key pair. Retrieve the private key after deploy:
@@ -33,7 +36,7 @@ const bootstrapScript = fs.readFileSync(
 
 const instance = new aws.lightsail.Instance("openclaw", {
     name: "openclaw",
-    availabilityZone: "eu-central-1a",
+    availabilityZone: `${region}a`,
     blueprintId: "ubuntu_22_04",
     // small_3_0: 2 vCPU, 2 GB RAM, 60 GB SSD — ~$10/month
     bundleId: "small_3_0",
