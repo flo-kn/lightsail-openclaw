@@ -1,0 +1,10 @@
+name: openclaw
+description: AWS Lightsail instance for running openclaw personal AI assistant
+runtime:
+  name: nodejs
+  options:
+    packagemanager: bun
+config:
+  pulumi:tags:
+    value:
+      pulumi:template: aws-typescript
