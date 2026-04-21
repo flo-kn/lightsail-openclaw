@@ -1,0 +1,16 @@
+{
+    "name": "openclaw",
+    "main": "index.ts",
+    "license": "UNLICENSED",
+    "scripts": {
+        "lint:sh": "shellcheck scripts/*.sh"
+    },
+    "devDependencies": {
+        "@types/node": "^22",
+        "typescript": "^5.7"
+    },
+    "dependencies": {
+        "@pulumi/pulumi": "^3.150.0",
+        "@pulumi/aws": "^7.0.0"
+    }
+}

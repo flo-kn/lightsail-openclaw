@@ -1,0 +1,10 @@
+/bin/
+/node_modules/
+
+# Stack configs contain encryption salts and environment-specific settings. These are not committed to this pulumi project repo.
+# Feel free to commit your own stack config.
+Pulumi.*.yaml
+
+*.pem
+
+.env
