@@ -5,12 +5,13 @@ import * as path from "path";
 
 const env = pulumi.getStack();
 const project = pulumi.getProject();
+const config = new pulumi.Config();
 const tags = {
-    "author": "knip",
+    "author": config.require("author"),
     "pulumiStack": env,
     "pulumiRepo": project,
     "deployment": "pulumi",
-    "org": "knip-builds",
+    "org": config.require("org"),
 };
 
 const awsConfig = new pulumi.Config("aws");

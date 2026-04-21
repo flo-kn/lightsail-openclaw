@@ -72,69 +72,73 @@ openclaw connects outbound to 20+ messaging platforms (Telegram, WhatsApp, Slack
 
 ---
 
-## Run this Pulumi Project
+## Prerequisites
 
-while being in project root dir
+- [Pulumi CLI](https://www.pulumi.com/docs/install/)
+- [Bun](https://bun.sh/)
+- An AWS account with credentials configured
 
-login to target account:
-```
-AWS_PROFILE=knip-builds
+### AWS authentication
+
+This project needs AWS credentials in your shell. The recommended approach is [AWS IAM Identity Center (SSO)](https://docs.aws.amazon.com/cli/latest/userguide/cli-configure-sso.html):
+
+```bash
+aws sso configure          # one-time setup
 aws sso login --profile $AWS_PROFILE
 ```
-(if not found type `aws sso configure` and fill in the details. More details about how to set up sso here [this blog post](https://blog.knip-builds.de/posts/aws-sso/))
 
-login to pulumi backend:
-```
-PULUMI_BACKEND=openclaw-pulumi-backend
-pulumi login s3://$PULUMI_BACKEND
-```
-
-Export the passphrase for the stack
-```
-export PULUMI_CONFIG_PASSPHRASE=xxxx
-```
-
-```
-pulumi stack select prod
-```
-
-```
-pulumi preview
-```
-
-```
-pulumi up
-```
+See the [AWS CLI authentication docs](https://docs.aws.amazon.com/cli/latest/userguide/cli-chap-authentication.html) for all available options (environment variables, credential files, etc.).
 
 ---
 
 ## Initial Setup
-_(in case of disaster or cloud account migration)_
 
-```
-PULUMI_BACKEND=openclaw-pulumi-backend
-```
+Create an S3 bucket for the Pulumi state backend (name must be globally unique):
 
-```
+```bash
+PULUMI_BACKEND=<your-project>-pulumi-backend
 aws s3 mb s3://$PULUMI_BACKEND
 ```
 
-```
+Log in to the backend and create a stack:
+
+```bash
 pulumi login s3://$PULUMI_BACKEND
-```
-
-```
-pulumi new typescript --name openclaw
-```
-
-Define a stack with name
-```
 pulumi stack init prod
 ```
 
-Choose a passphrase and export it afterwards. You will get prompted again:
+Choose a passphrase when prompted, then export it:
+
+```bash
+export PULUMI_CONFIG_PASSPHRASE=<your-passphrase>
 ```
-export PULUMI_CONFIG_PASSPHRASE=<thePassphrase>
+
+Install dependencies and set your stack config:
+
+```bash
+bun install
+pulumi config set aws:region eu-central-1
+pulumi config set author <your-name>
+pulumi config set org <your-org>
+```
+
+See `Pulumi.prod.yaml.example` for the expected config shape.
+
+---
+
+## Run this Pulumi Project
+
+```bash
+export AWS_PROFILE=<your-profile>
+aws sso login --profile $AWS_PROFILE
+
+PULUMI_BACKEND=<your-project>-pulumi-backend
+pulumi login s3://$PULUMI_BACKEND
+export PULUMI_CONFIG_PASSPHRASE=<your-passphrase>
+
+pulumi stack select prod
+pulumi preview
+pulumi up
 ```
 
 ---
@@ -172,7 +176,8 @@ Follow the prompts to configure your AI model, channels, and workspace.
 │   └── bootstrap.sh                # Instance userdata (Node.js, openclaw)
 ├── config/                         # (future) openclaw config-as-code, synced to S3
 ├── Pulumi.yaml
-├── Pulumi.prod.yaml
+├── Pulumi.prod.yaml.example        # Example stack config (copy & fill in)
+├── Pulumi.prod.yaml                # Your stack config (gitignored)
 ├── package.json
 ├── tsconfig.json
 └── .gitignore
