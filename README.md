@@ -1,10 +1,16 @@
 # Open Claw Infrastructure
 
-Infrastructure to run openclaw on AWS Lightsail.
+🦞⛵ Infrastructure to run openclaw on AWS Lightsail.
+
+
+<p align="center">
+  <img src="lobster_icon_1.png" width="256" alt="Kafka Helm Cooker icon" />
+</p>
+
 
 ## AWS Infrastructure
 
-An AWS Pulumi project to install, run and operate [openclaw](https://github.com/openclaw/openclaw) on AWS Lightsail.
+An AWS Pulumi project to install, run and operate [openclaw](https://github.com/openclaw/openclaw) on [AWS Lightsail](https://aws.amazon.com/lightsail/).
 
 ### What this creates
 
@@ -36,30 +42,30 @@ openclaw connects outbound to 20+ messaging platforms (Telegram, WhatsApp, Slack
 
 ```
 ┌─ Your Machine ─────────────────────────────────────────────┐
-│                                                             │
+│                                                            │
 │  Terminal ─── SSH (TCP/22) ──────────────────────────────────────┐
-│  Browser ─── SSH tunnel (localhost:18789 → :18789) ─────────┐   │
-│                                                             │   │
-└─────────────────────────────────────────────────────────────┘   │
-                                                              │   │
-                                                              ▼   ▼
+│  Browser ─── SSH tunnel (localhost:18789 → :18789) ─────────┐    │
+│                                                             │    │
+└─────────────────────────────────────────────────────────────┘    │
+                                                              │    │
+                                                              ▼    ▼
 ┌─ Lightsail (eu-central-1) ──────────────────────────────────────────┐
-│  Firewall: inbound TCP/22 only, outbound all                       │
+│  Firewall: inbound TCP/22 only, outbound all                        │
 │                                                                     │
-│  ┌─ Gateway (127.0.0.1:18789) ───────────────────────────────────┐ │
-│  │  Dashboard UI · Pi Agent · Session store (~/.openclaw/)       │ │
+│  ┌─ Gateway (127.0.0.1:18789) ───────────────────────────────────┐  │
+│  │  Dashboard UI · Pi Agent · Session store (~/.openclaw/)       │  │
 │  │  Telegram adapter (grammY) ──── outbound long polling ────────────┐
-│  └───────────────────────────────────────────────────────────────┘ │ │
-└───────────────────────────────────────────────────────────────────┘ │
-                                                                      │
-                         OUTBOUND ONLY                                │
-                         ─────────────────────────────────────────────┤
-                                                                      │
-           ┌──────────────────┐  ┌─────────────────┐                  │
+│  └───────────────────────────────────────────────────────────────┘│  │
+└───────────────────────────────────────────────────────────────────┘  │
+                                                                       │
+                         OUTBOUND ONLY                                 │
+                         ─────────────────────────────────────────────-┤
+                                                                       │
+           ┌──────────────────┐  ┌────────────────-─┐                  │
            │ Telegram Bot API │  │ Anthropic API    │                  │
            │ api.telegram.org │  │ api.anthropic.com│ ◄────────────────┘
            │ HTTPS/443        │  │ HTTPS/443        │
-           └──────────────────┘  └─────────────────┘
+           └──────────────────┘  └───────────────-──┘
 ```
 
 | Connection | Protocol | Port | Direction | Notes |
@@ -78,9 +84,9 @@ openclaw connects outbound to 20+ messaging platforms (Telegram, WhatsApp, Slack
 - [Bun](https://bun.sh/)
 - An AWS account with credentials configured
 
-### AWS authentication
+### AWS Login
 
-This project needs AWS credentials in your shell. The recommended approach is [AWS IAM Identity Center (SSO)](https://docs.aws.amazon.com/cli/latest/userguide/cli-configure-sso.html):
+This project needs AWS credentials in your shell - at least when running locally on your workstation.  The recommended approach is [AWS IAM Identity Center (SSO)](https://docs.aws.amazon.com/cli/latest/userguide/cli-configure-sso.html):
 
 ```bash
 aws sso configure          # one-time setup
