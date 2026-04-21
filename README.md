@@ -93,7 +93,7 @@ This project needs AWS credentials in your shell - at least when running locally
 aws sso configure          # one-time setup
 aws sso login --profile $AWS_PROFILE
 ```
-_(More details on how to configure sso and why it's generally recommend in [my blog post on aws sso](More details about how to set up sso here [this blog post](https://blog.knip-builds.de/posts/aws-sso/))_
+_(More details on how to configure sso and why it's generally recommend I have written in [this blog post on aws sso](https://blog.knip-builds.de/posts/aws-sso/))_
 
 See the [AWS CLI authentication docs](https://docs.aws.amazon.com/cli/latest/userguide/cli-chap-authentication.html) for all available options (environment variables, credential files, etc.).
 
