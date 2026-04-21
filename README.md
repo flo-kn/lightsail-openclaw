@@ -4,8 +4,9 @@
 
 
 <p align="center">
-  <img src="lobster_icon_1.png" width="256" alt="Kafka Helm Cooker icon" />
+  <a href="https://claude.ai/share/01f22b97-ae0c-469d-ba86-0032efb65aa9"><img src="lobster_icon_1.png" width="256" alt="openclaw icon" /></a>
 </p>
+
 
 
 ## AWS Infrastructure
