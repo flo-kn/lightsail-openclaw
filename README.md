@@ -87,12 +87,13 @@ openclaw connects outbound to 20+ messaging platforms (Telegram, WhatsApp, Slack
 
 ### AWS Login
 
-This project needs AWS credentials in your shell - at least when running locally on your workstation.  The recommended approach is [AWS IAM Identity Center (SSO)](https://docs.aws.amazon.com/cli/latest/userguide/cli-configure-sso.html):
+This project needs AWS credentials in your shell - at least when running locally on your workstation.  The recommended approach is using [AWS IAM Identity Center (SSO)](https://docs.aws.amazon.com/cli/latest/userguide/cli-configure-sso.html):
 
 ```bash
 aws sso configure          # one-time setup
 aws sso login --profile $AWS_PROFILE
 ```
+_(More details on how to configure sso and why it's generally recommend in [my blog post on aws sso](More details about how to set up sso here [this blog post](https://blog.knip-builds.de/posts/aws-sso/))_
 
 See the [AWS CLI authentication docs](https://docs.aws.amazon.com/cli/latest/userguide/cli-chap-authentication.html) for all available options (environment variables, credential files, etc.).
 
