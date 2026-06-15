@@ -208,15 +208,22 @@ runs) before cycling — prefer it over `--force` for routine restarts.
 Trigger it from the **Actions** tab → **Restart openclaw** → **Run workflow**,
 and pick `safe` (default) or `force`.
 
-It needs two repository secrets (Settings → Secrets and variables → Actions):
+It reads the instance IP and SSH key **dynamically from the Pulumi stack
+outputs** (`publicIp` and `privateKey`) rather than storing them as secrets, so
+the action always tracks the current instance. It assumes the deployment role
+via AWS OIDC to reach the S3 state backend, then runs `openclaw gateway restart`
+and reports `openclaw gateway status`.
+
+Only two non-instance-specific secrets are needed (Settings → Secrets and
+variables → Actions):
 
 | Secret | Value |
 |---|---|
-| `OPENCLAW_HOST` | Public IP — `pulumi stack output publicIp` |
-| `OPENCLAW_SSH_KEY` | Private key — `pulumi stack output privateKey --show-secrets` |
+| `AWS_DEPLOYMENT_ROLE_ARN` | IAM role assumed via OIDC to read the Pulumi S3 backend |
+| `PULUMI_CONFIG_PASSPHRASE` | Passphrase to decrypt the `privateKey` stack secret |
 
-The workflow writes the key, adds the host to `known_hosts`, then runs
-`openclaw gateway restart` and reports `openclaw gateway status`.
+The backend (`s3://openclaw-pulumi-backend`), stack (`prod`) and region are set
+as `env:` at the top of the workflow.
 
 ---
 

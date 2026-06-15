@@ -3,9 +3,13 @@ name: Restart openclaw
 # Restarts the openclaw Gateway daemon on the Lightsail instance over SSH.
 # The daemon is a systemd user service installed via `openclaw onboard --install-daemon`.
 #
+# The instance IP and SSH private key are read dynamically from the Pulumi
+# stack outputs (`publicIp`, `privateKey`) — nothing instance-specific is
+# stored as a GitHub secret.
+#
 # Required repository secrets:
-#   OPENCLAW_HOST    Public (static) IP of the instance — `pulumi stack output publicIp`
-#   OPENCLAW_SSH_KEY Private SSH key — `pulumi stack output privateKey --show-secrets`
+#   AWS_DEPLOYMENT_ROLE_ARN   IAM role assumed via OIDC (read the S3 state backend)
+#   PULUMI_CONFIG_PASSPHRASE  Passphrase to decrypt the `privateKey` stack secret
 
 on:
   workflow_dispatch:
@@ -22,21 +26,48 @@ concurrency:
   group: restart-openclaw
   cancel-in-progress: false
 
+env:
+  AWS_REGION: eu-central-1
+  PULUMI_BACKEND: s3://openclaw-pulumi-backend
+  PULUMI_STACK: prod
+  PULUMI_CONFIG_PASSPHRASE: ${{ secrets.PULUMI_CONFIG_PASSPHRASE }}
+
 jobs:
   restart:
     runs-on: ubuntu-latest
+    permissions:
+      # Ignore validation error - this line is necessary
+      id-token: write
+      contents: read
     steps:
-      - name: Configure SSH
+      - uses: actions/checkout@v5
+        with:
+          fetch-depth: 1
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v5
+        with:
+          role-to-assume: ${{ secrets.AWS_DEPLOYMENT_ROLE_ARN }}
+          aws-region: ${{ env.AWS_REGION }}
+
+      - name: Read connection details from Pulumi outputs
         run: |
+          pulumi login "$PULUMI_BACKEND"
+          pulumi stack select "$PULUMI_STACK"
+
+          HOST=$(pulumi stack output publicIp)
+          echo "OPENCLAW_HOST=$HOST" >> "$GITHUB_ENV"
+
           mkdir -p ~/.ssh
           chmod 700 ~/.ssh
-          printf '%s\n' "${{ secrets.OPENCLAW_SSH_KEY }}" > ~/.ssh/openclaw.pem
+          # Redirect straight to the file so the key never reaches the logs.
+          pulumi stack output privateKey --show-secrets > ~/.ssh/openclaw.pem
           chmod 600 ~/.ssh/openclaw.pem
-          ssh-keyscan -H "${{ secrets.OPENCLAW_HOST }}" >> ~/.ssh/known_hosts 2>/dev/null
+          ssh-keyscan -H "$HOST" >> ~/.ssh/known_hosts 2>/dev/null
 
       - name: Restart Gateway daemon
         run: |
           ssh -i ~/.ssh/openclaw.pem \
             -o BatchMode=yes \
-            "ubuntu@${{ secrets.OPENCLAW_HOST }}" \
+            "ubuntu@${OPENCLAW_HOST}" \
             "export XDG_RUNTIME_DIR=/run/user/\$(id -u); openclaw gateway restart --${{ inputs.mode }} && openclaw gateway status"
