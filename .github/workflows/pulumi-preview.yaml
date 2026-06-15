@@ -1,0 +1,87 @@
+name: Preview a Pulumi environment
+
+on:
+  workflow_call:
+
+    inputs:
+
+      working_directory:
+        required: true
+        description: Working directory of the Pulumi project
+        type: string
+      github_environment:
+        required: true
+        description: Environment deployment target in Github
+        type: string
+      aws_region:
+        description: AWS region to deploy an app to
+        type: string
+        default: eu-central-1
+        required: false   
+      pulumi_stack_name:
+        required: true
+        description: Pulumi stack name parameter without -<environment> part 
+        type: string
+      pulumi_backend:
+        required: true
+        description: Full Pulumi cloud URL parameter
+        type: string
+        
+    secrets:
+      pulumi_passphrase:
+        required: true
+        description: Pulumi passphrase secret
+      deployment_role_arn:
+        required: true
+        description: AWS role to assume
+      cloudflare_api_token:
+        required: false
+        description: Cloudflare API token for DNS management
+
+
+jobs:
+  preview:
+    runs-on: ubuntu-latest
+    name: Preview ${{inputs.pulumi_stack_name}} stack
+    permissions:
+      # Ignore validation error - this line is necessary
+      id-token: write
+      contents: read
+    env:
+      PULUMI_CONFIG_PASSPHRASE: ${{ secrets.pulumi_passphrase }}
+      CLOUDFLARE_API_TOKEN: ${{ secrets.cloudflare_api_token }}
+    environment:
+      name: ${{ inputs.github_environment }}
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          fetch-depth: 1
+      - name: configure aws credentials
+        uses: aws-actions/configure-aws-credentials@v5
+        with:
+          role-to-assume: ${{ secrets.deployment_role_arn }}
+          aws-region: ${{ inputs.aws_region }}
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 9
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: 'pnpm'
+          cache-dependency-path: ${{ inputs.working_directory }}/bun-lock.yaml
+      - name: Install infrastructure dependencies
+        run: pnpm install --frozen-lockfile
+        working-directory: ${{ inputs.working_directory }}
+
+      - run: |
+          pulumi login ${{ inputs.pulumi_backend }}
+          pulumi stack select ${{ inputs.pulumi_stack_name }}
+        working-directory: ${{ inputs.working_directory }}
+      - uses: pulumi/actions@v5
+        with:
+          command: preview
+          stack-name: ${{ inputs.pulumi_stack_name }}
+          work-dir: ${{ inputs.working_directory }}
+          cloud-url: ${{ inputs.pulumi_backend }}

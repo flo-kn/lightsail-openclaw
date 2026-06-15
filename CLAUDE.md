@@ -133,7 +133,7 @@ config:
 ## Updating Existing Projects
 
 When touching an older project:
-- Migrate the package manager to bun (remove `yarn.lock`, `package-lock.json`, `pnpm-lock.yaml`; run `bun install`).
+- Migrate the package manager to bun (remove `yarn.lock`, `package-lock.json`, `bun-lock.yaml`; run `bun install`).
 - Update `Pulumi.yaml` to set `packagemanager: bun`.
 - Bump `@types/node` to `^22`, `typescript` to `^5.7`, and Pulumi providers to their latest `^x.y.z` ranges.
 - Update `tsconfig.json` target to `ES2022` if it is older.

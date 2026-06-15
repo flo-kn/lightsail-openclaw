@@ -1,0 +1,23 @@
+name: Timesheet Tool pulumi up
+
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+
+
+jobs:
+  deploy-prod:
+    permissions:
+      id-token: write
+      contents: read
+    uses: ./.github/workflows/pulumi-up.yaml
+    with:
+      working_directory: ./timesheet-tool
+      github_environment: timesheet-tool
+      pulumi_stack_name: prod
+      pulumi_backend: s3://kb-timesheet-tool-pulumi-backend
+    secrets:
+      pulumi_passphrase: ${{ secrets.PULUMI_CONFIG_PASSPHRASE }}
+      deployment_role_arn: ${{ secrets.DEPLOYMENT_ROLE_ARN }}
