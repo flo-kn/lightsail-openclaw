@@ -174,12 +174,59 @@ openclaw onboard --install-daemon
 
 Follow the prompts to configure your AI model, channels, and workspace.
 
+The daemon is a **systemd user service** for the `ubuntu` user, so it keeps the
+Gateway running in the background and restarts it on reboot.
+
+---
+
+## Restarting openclaw
+
+The Gateway daemon is managed through the `openclaw gateway` CLI. SSH into the
+instance and run:
+
+```bash
+openclaw gateway restart --safe   # drains active work, then restarts
+openclaw gateway restart --force  # restarts immediately
+openclaw gateway status           # health + installation state
+openclaw gateway stop             # stop the daemon
+openclaw gateway start            # start the daemon
+openclaw gateway install          # (re)install the systemd user service
+openclaw gateway uninstall        # remove the service
+```
+
+`--safe` asks the running Gateway to preflight active work (reply delivery, task
+runs) before cycling — prefer it over `--force` for routine restarts.
+
+> **`openclaw daemon …` is a legacy alias** for the same surface — every
+> subcommand maps 1:1 (`daemon restart` → `gateway restart`,
+> `daemon status` → `gateway status`, etc.). Use `openclaw gateway`; it's the
+> current/recommended form.
+
+### Restart from GitHub (no SSH needed)
+
+`.github/workflows/restart-openclaw.yml` runs the restart for you over SSH.
+Trigger it from the **Actions** tab → **Restart openclaw** → **Run workflow**,
+and pick `safe` (default) or `force`.
+
+It needs two repository secrets (Settings → Secrets and variables → Actions):
+
+| Secret | Value |
+|---|---|
+| `OPENCLAW_HOST` | Public IP — `pulumi stack output publicIp` |
+| `OPENCLAW_SSH_KEY` | Private key — `pulumi stack output privateKey --show-secrets` |
+
+The workflow writes the key, adds the host to `known_hosts`, then runs
+`openclaw gateway restart` and reports `openclaw gateway status`.
+
 ---
 
 ## Project structure
 
 ```
 ├── index.ts                        # Pulumi entry point
+├── .github/
+│   └── workflows/
+│       └── restart-openclaw.yml    # Manual SSH restart of the Gateway daemon
 ├── scripts/
 │   └── bootstrap.sh                # Instance userdata (Node.js, openclaw)
 ├── config/                         # (future) openclaw config-as-code, synced to S3

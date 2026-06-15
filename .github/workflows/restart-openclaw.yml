@@ -1,0 +1,42 @@
+name: Restart openclaw
+
+# Restarts the openclaw Gateway daemon on the Lightsail instance over SSH.
+# The daemon is a systemd user service installed via `openclaw onboard --install-daemon`.
+#
+# Required repository secrets:
+#   OPENCLAW_HOST    Public (static) IP of the instance — `pulumi stack output publicIp`
+#   OPENCLAW_SSH_KEY Private SSH key — `pulumi stack output privateKey --show-secrets`
+
+on:
+  workflow_dispatch:
+    inputs:
+      mode:
+        description: "Restart mode"
+        type: choice
+        default: safe
+        options:
+          - safe   # drain active work first (openclaw gateway restart --safe)
+          - force  # restart immediately (openclaw gateway restart --force)
+
+concurrency:
+  group: restart-openclaw
+  cancel-in-progress: false
+
+jobs:
+  restart:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Configure SSH
+        run: |
+          mkdir -p ~/.ssh
+          chmod 700 ~/.ssh
+          printf '%s\n' "${{ secrets.OPENCLAW_SSH_KEY }}" > ~/.ssh/openclaw.pem
+          chmod 600 ~/.ssh/openclaw.pem
+          ssh-keyscan -H "${{ secrets.OPENCLAW_HOST }}" >> ~/.ssh/known_hosts 2>/dev/null
+
+      - name: Restart Gateway daemon
+        run: |
+          ssh -i ~/.ssh/openclaw.pem \
+            -o BatchMode=yes \
+            "ubuntu@${{ secrets.OPENCLAW_HOST }}" \
+            "export XDG_RUNTIME_DIR=/run/user/\$(id -u); openclaw gateway restart --${{ inputs.mode }} && openclaw gateway status"
